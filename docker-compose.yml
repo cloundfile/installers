@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  osrm:
+    image: osrm/osrm-backend
+    command: osrm-routed --algorithm mld /data/brazil-latest.osrm
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./osrm_data:/data
