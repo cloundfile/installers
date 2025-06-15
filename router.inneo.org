@@ -1,0 +1,32 @@
+#!/bin/bash
+
+set -e
+
+DATA=osrm_data
+OSM_FILE=brazil-latest.osm.pbf
+OSM_URL=https://download.geofabrik.de/south-america/brazil-latest.osm.pbf
+PROFILE_URL=https://raw.githubusercontent.com/Project-OSRM/osrm-backend/master/profiles/foot.lua
+
+mkdir -p $DATA
+
+if [ ! -f "$DATA/$OSM_FILE" ]; then
+  echo "Baixando dados OSM..."
+  wget $OSM_URL -O $DATA/$OSM_FILE
+else
+  echo "Dados OSM já existem."
+fi
+
+if [ ! -f "$DATA/foot.lua" ]; then
+  echo "Baixando perfil foot.lua..."
+  wget $PROFILE_URL -O $DATA/foot.lua
+else
+  echo "Perfil foot.lua já existe."
+fi
+
+echo "Extraindo dados com perfil foot.lua..."
+docker run --rm -t -v $(pwd)/$DATA:/data osrm/osrm-backend osrm-extract -p /data/foot.lua /data/$OSM_FILE
+
+echo "Contratando a rede..."
+docker run --rm -t -v $(pwd)/$DATA:/data osrm/osrm-backend osrm-contract /data/${OSM_FILE%.osm.pbf}.osrm
+
+echo "Setup concluído! Rode o servidor com Docker Compose."
