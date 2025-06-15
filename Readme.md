@@ -10,4 +10,7 @@ chmod +x router.sh
 ```
 ./router.sh
 ```
-
+# dubir o servidor docker
+```
+docker-compose up -d
+```
