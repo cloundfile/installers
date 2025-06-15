@@ -6,6 +6,8 @@ DATA=osrm_data
 OSM_FILE=brazil-latest.osm.pbf
 OSM_URL=https://download.geofabrik.de/south-america/brazil-latest.osm.pbf
 PROFILE_URL=https://raw.githubusercontent.com/Project-OSRM/osrm-backend/master/profiles/foot.lua
+COMPOSE_FILE=docker-compose.yml
+COMPOSE_URL=https://raw.githubusercontent.com/cloundfile/installers/main/docker-compose.yml
 
 mkdir -p $DATA
 
@@ -23,10 +25,18 @@ else
   echo "Perfil foot.lua já existe."
 fi
 
+if [ ! -f "$COMPOSE_FILE" ]; then
+  echo "Baixando docker-compose.yml..."
+  wget $COMPOSE_URL -O $COMPOSE_FILE
+else
+  echo "Arquivo docker-compose.yml já existe."
+fi
+
 echo "Extraindo dados com perfil foot.lua..."
 docker run --rm -t -v $(pwd)/$DATA:/data osrm/osrm-backend osrm-extract -p /data/foot.lua /data/$OSM_FILE
 
 echo "Contratando a rede..."
 docker run --rm -t -v $(pwd)/$DATA:/data osrm/osrm-backend osrm-contract /data/${OSM_FILE%.osm.pbf}.osrm
 
-echo "Setup concluído! Rode o servidor com Docker Compose."
+echo "Setup concluído! Rode o servidor com Docker Compose:"
+echo "  docker-compose up -d"
